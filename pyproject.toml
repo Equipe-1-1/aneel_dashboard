@@ -1,0 +1,18 @@
+[project]
+name = "aneel_dashboard"
+version = "0.1.0"
+description = "A dashboard with ANEEL's open API data."
+readme = "README.md"
+requires-python = "==3.12.3"
+dependencies = [
+    "dash==2.18.0",
+    "jupyterlab==4.4.0",
+    "pandas==2.2.3",
+    "polars==1.22.0",
+    "requests==2.32.3",
+]
+
+[tool.uv.workspace]
+members = [
+    "dashboard-app",
+]
