@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard de Geração Distribuída ANEEL</title>
+    
+    <link rel="stylesheet" href="style.css">
+
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+<body>
+    <div class="header">
+        <h1>Dashboard de Geração Distribuída ANEEL</h1>
+        <p>Análise de Empreendimentos de Geração Distribuída no Brasil</p>
+    </div>
+
+    <div class="container">
+        <div class="controls">
+            <button onclick="showGraph('graph_estado_container')">Gráfico por Estado</button>
+            <button onclick="showGraph('graph_fonte_energia_container')">Gráfico de Fonte</button>
+            <button onclick="showGraph('graph_classe_consumo_container')">Gráfico de Classe</button>
+            <button onclick="showGraph('graph_empreendimentos_recentes_container')">Gráfico Recentes</button>
+            <button onclick="showGraph('graph_ranking_municipios_container')">Gráfico Ranking</button>
+            <button onclick="showGraph('all')">Mostrar Todos</button>
+            <button onclick="showGraph('none')">Esconder Todos</button>
+        </div>
+
+        <div id="graph_estado_container" class="chart-container">
+            <h2>Gráfico: Número de Empreendimentos por Estado</h2>
+            <div id="graph_estado_plot"></div>
+        </div>
+
+        <div id="graph_fonte_energia_container" class="chart-container hidden">
+            <h2>Gráfico: Distribuição por Fonte de Energia</h2>
+            <div id="graph_fonte_energia_plot"></div>
+        </div>
+
+        <div id="graph_classe_consumo_container" class="chart-container hidden">
+            <h2>Gráfico: Segmentação por Classe de Consumo</h2>
+            <div id="graph_classe_consumo_plot"></div>
+        </div>
+
+        <div id="graph_empreendimentos_recentes_container" class="chart-container hidden">
+            <h2>Gráfico: Potência Instalada dos Novos Empreendimentos</h2>
+            <div id="graph_empreendimentos_recentes_plot"></div>
+        </div>
+
+        <div id="graph_ranking_municipios_container" class="chart-container hidden">
+            <h2>Gráfico: Ranking dos 20 Municípios com Maior Potencial</h2>
+            <div id="graph_ranking_municipios_plot"></div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>&copy; 2025 Dashboard de Geração Distribuída ANEEL. Todos os direitos reservados.</p>
+    </div>
+
+    <script src="script.js"></script> 
+</body>
+</html>
