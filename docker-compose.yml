@@ -8,5 +8,5 @@ services:
     expose:
       - 3000
     volumes:
-      - .:/var/www/html/app
+      - ./aneel-frontend:/var/www/html/app
     tty: true
