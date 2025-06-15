@@ -1,17 +1,35 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
+import React, { useState } from 'react'
 import './App.css'
+import "bootstrap/dist/css/bootstrap.min.css";
+import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
 import PlotComponent from './components/PlotComponent'
+import OptionBar from './components/OptionBar'
+import National from './views/National';
+import Regional from './views/Regional';
+import Trends from './views/Trends';
+import Modalities from './views/Modalities';
+import Home from './views/Home';
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
-    <div className="App">
-      <h1>My Resampled Plot (TypeScript)</h1>
-      <PlotComponent />
-    </div>
+    <>
+      <React.StrictMode>
+        <Router>
+          <OptionBar />
+
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/national" element={<National />} />
+            <Route path="/regional" element={<Regional />} />
+            <Route path="/trends" element={<Trends />} />
+            <Route path="/modalities" element={<Modalities />} />
+          </Routes>
+
+          <PlotComponent />
+        </Router>
+      </React.StrictMode>
+
+    </>
   )
 }
 

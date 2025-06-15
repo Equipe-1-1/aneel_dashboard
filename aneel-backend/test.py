@@ -1,3 +1,4 @@
+'''
 import plotly.graph_objects as go; import numpy as np
 from plotly_resampler import FigureResampler, FigureWidgetResampler
 
@@ -9,3 +10,11 @@ fig = FigureResampler(go.Figure())
 fig.add_trace(go.Scattergl(name='noisy sine', showlegend=True), hf_x=x, hf_y=noisy_sin)
 
 fig.show_dash(mode='inline')
+
+'''
+from DataHandler import DataHandler
+
+dh = DataHandler()
+lf = dh.load_data()
+#print(dh.load_data())
+print(type(lf))
