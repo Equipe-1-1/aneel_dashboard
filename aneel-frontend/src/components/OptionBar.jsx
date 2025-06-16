@@ -10,7 +10,7 @@ function OptionBar() {
         <Navbar.Brand 
             style={{ marginLeft: 0, paddingLeft: 0 }}
             as={NavLink}
-            to="/">Pequenos Distribuidores
+            to="/">Pequenos Geradores
         </Navbar.Brand>
         
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
