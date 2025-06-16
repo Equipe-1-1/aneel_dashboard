@@ -1,5 +1,7 @@
+import PlotComponent from "../components/PlotComponent";
+
 function National() {
-  return <h2>Panorama Nacional</h2>;
+  return <PlotComponent endpoint="/national-horizontal/"/>
 }
 
 export default  National;
