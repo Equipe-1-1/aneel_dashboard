@@ -14,7 +14,7 @@
 
 - Python 	=> 3.12.3
 - Docker 	=> 28.1.1
-- uv 		=> 0.6.14
+- UV 		=> 0.6.14
 - Git		=> 2.43.0
 
 ## Initial Setup <a name="setup"></a>
@@ -24,15 +24,14 @@ There are three official ways to install the UV (the package manager) and they c
 
 After installed the UV, run the command `uv sync` to synchronise the project configurations.
 
-### 2. Virtual Environment <a name="virtual-environment"></a>
-To initialize the venv environment execute the command:
+### 2. Back-end <a name="virtual-environment"></a>
+To execute the back-end code, firstly use the command bellow to synchronize the UV project dependencies (inside the `/aneel-backend` directory):
 ```bash
-$ source .venv/bin/activate
+$ uv sync
 ```
-After that, each input line on the terminal during the session is going to begin with ```(environment name)```. <br/>
-To disable the virtual environment of the session, execute:
+After that, to run the development back-end service, execute:
 ```bash
-(environment name) $ deactivate
+$ uv run fastapi dev
 ```
 
 ### 3. Front-end

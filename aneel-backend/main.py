@@ -46,8 +46,6 @@ async def get_plot_data():
 @app.get("/national-horizontal/")
 async def get_national_horizontal():
     label_category = "NomRegiao"
-    regions = lf.select(label_category).unique().collect()
-    regions = regions[label_category].to_list()
     
     lfs = [
         lf.group_by(label_category).agg(
@@ -85,11 +83,84 @@ async def get_national_horizontal():
     #return json.loads(df.write_json())
 
     fig = go.Figure(
-            go.Bar(x=df["potency_sum"],
+        go.Bar(
+            x=df["potency_sum"],
             y=df[label_category],
             marker_color=df["color"],
-            orientation='h')
+            orientation='h',
+            hovertemplate = '<b>Produção</b>: %{x:.2f}kW<extra></extra>',
+            hoverinfo="skip"
+        )
     )
 
+    fig.update_layout(
+        title="Produção por região",
+        xaxis_title="Potência instalada (kW)"
+    )
+
+    fig = fig.to_json()
+    return json.loads(fig)
+
+
+
+@app.get("/national-bubble/")
+async def get_national_bubble():
+    location_cols = ["NomRegiao","NomMunicipio", "SigUF"]
+
+    potency_lf = (
+        lf.group_by(location_cols).agg(
+            pl.col("MdaPotenciaInstaladaKW")
+            .sum()
+            .round(2)
+            .alias("potency_sum"),
+
+            pl.col("MdaPotenciaInstaladaKW")
+            .is_not_null()
+            .sum()
+            .alias("number_of_productors"),
+
+            pl.col("SigModalidadeEmpreendimento")
+            .filter(pl.col("SigModalidadeEmpreendimento") == "P")
+            .is_not_null()
+            .sum()
+            .alias("micro_businesses_count"),
+        )
+    )
+
+    potency_lf = (
+        potency_lf.with_columns(
+            pl.concat_str(
+                [pl.col("NomMunicipio"), pl.col("SigUF")],
+                separator=", "
+            ).alias("city_state")
+        )
+    )
+
+    df = potency_lf.collect()
+
+    #return json.loads(df.write_json())
+
+    fig = go.Figure(
+        go.Scatter(
+            x=df["potency_sum"],
+            y=df["micro_businesses_count"],
+            marker=dict(
+                size=df["number_of_productors"],
+                #color=df["NomRegiao"],
+            ),
+            #hover_name=df["city_state"],
+            #log_x = True,
+            #size_max=60,
+            hovertemplate = '<b>Produção</b>: %{x:.2f}kW<extra></extra>',
+            hoverinfo="skip"
+        )
+    )
+
+    fig.update_layout(
+        title="Produção por região",
+        xaxis_title="Potência instalada (kW)",
+        yaxis_title="Número de microgedores (P)"
+    )
+    
     fig = fig.to_json()
     return json.loads(fig)
