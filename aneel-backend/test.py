@@ -15,6 +15,6 @@ fig.show_dash(mode='inline')
 from DataHandler import DataHandler
 
 dh = DataHandler()
-lf = dh.load_data()
-#print(dh.load_data())
-print(type(lf))
+lf = dh.LazyFrame()
+df = lf.collect()
+print(df.shape)

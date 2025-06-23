@@ -1,34 +1,26 @@
-import requests
+from DataLoader import DataLoader
+from os.path import exists
+
 import polars as pl
-from datetime import datetime as time
-import json
-import io
-import pandas as pd
+
+from time import time
 
 class DataHandler:
     def __init__(self):
-        self.base_url = "https://dadosabertos.aneel.gov.br"
-        self.result_total = self.get_result_total()
+        self.DATA_PATH = "./data/"
+        self.DATA_FILE = "aneel.parquet"
+        self.DATA_FILE_PATH = self.DATA_PATH + self.DATA_FILE
+        self.data_loader = DataLoader(self.DATA_FILE_PATH)
 
-    
-    def get_result_total(self) -> str:
-        url = self.get_initial_url(0)
-        answer = requests.get(url).json()
-        return answer.get("result").get("total")
+    def LazyFrame(self):
+        has_no_data_file = not exists(self.DATA_FILE_PATH)
 
-    
-    def get_initial_url(self, limit: int) -> str:
-        return f"{self.base_url}/api/3/action/datastore_search" + \
-            f"?resource_id=b1bd71e7-d0ad-4214-9053-cbd58e9564a7&limit={limit}"
+        if has_no_data_file:
+            init_time = time()
+            self.data_loader.load()
+            print(f"Loading data took {time() - init_time:.2f} seconds.")
 
-    
-    def load_data(self) -> pl.LazyFrame:        
-        url = self.get_initial_url(self.result_total)
-        answer = requests.get(url).json()
-
-        records = answer.get("result").get("records")
-        
-        lf = pl.LazyFrame(records)
+        lf = pl.scan_parquet(self.DATA_FILE_PATH)
 
         return lf.with_columns(
             pl.col("MdaPotenciaInstaladaKW").str.replace(",", ".")

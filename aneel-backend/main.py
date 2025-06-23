@@ -21,7 +21,7 @@ app.add_middleware(
 df = px.data.gapminder()
 
 dh = DataHandler()
-lf = dh.load_data()
+lf = dh.LazyFrame()
 
 
 @app.get("/plot-data/")
@@ -55,15 +55,8 @@ async def get_national_horizontal():
     ]
 
     lfs.append(
-        lfs[0].select(
-            pl.lit("Soma das regiões").alias(label_category),
-            pl.col("potency_sum").sum().round(2)
-        )
-    )
-
-    lfs.append(
         lf.select(
-            pl.lit("Soma total").alias(label_category),
+            pl.lit("Produção Nacional").alias(label_category),
             pl.col("MdaPotenciaInstaladaKW")
             .sum().round(2).alias("potency_sum")
         )
@@ -72,7 +65,7 @@ async def get_national_horizontal():
     potency_lf = pl.concat(lfs)
     potency_lf = potency_lf.sort("potency_sum")
     potency_lf = potency_lf.with_columns(
-        pl.when(pl.col(label_category) == "Soma total")
+        pl.when(pl.col(label_category) == "Produção Nacional")
         .then(pl.lit("RoyalBlue"))
         .otherwise(pl.lit("DimGrey"))
         .alias("color")
@@ -138,7 +131,7 @@ async def get_national_bubble():
 
     df = potency_lf.collect()
 
-    #return json.loads(df.write_json())
+    return json.loads(df.write_json())
 
     fig = go.Figure(
         go.Scatter(
@@ -163,4 +156,4 @@ async def get_national_bubble():
     )
     
     fig = fig.to_json()
-    return json.loads(fig)
+    #return json.loads(fig)
