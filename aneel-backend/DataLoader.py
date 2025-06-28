@@ -22,19 +22,19 @@ class DataLoader:
 
     def load(self) -> None:
         try:
-            answer = self.make_request(0)
+            answer = self.request_aneel(0)
             total, records = self.get_request_infos(answer)
             self.to_write.put((0, records))
 
             table = pa.Table.from_pylist(records)
             number_of_threads = total // self.REQUESTS_LIMIT
 
-            with ThreadPoolExecutor(max_workers=31) as executor:
+            with ThreadPoolExecutor(max_workers=21) as executor:
                 writer_future = executor.submit(self.write_loads, table.schema, number_of_threads + 1)
 
                 offset = self.REQUESTS_LIMIT
                 for i in range(number_of_threads):
-                    executor.submit(self.load_request, offset)
+                    executor.submit(self.handle_aneel_request, offset)
                     offset += self.REQUESTS_LIMIT
                     sleep(0.05)
 
@@ -43,7 +43,7 @@ class DataLoader:
             raise ConnectionError(f"Some error: {e}")
 
 
-    def make_request(self, offset: int)-> str:
+    def request_aneel(self, offset: int)-> str:
         try:
             params = {
                 "resource_id": self.RESOURCE_ID,
@@ -60,9 +60,9 @@ class DataLoader:
             raise ConnectionError("Some error making a request")
 
 
-    def load_request(self, offset: int) -> None:
+    def handle_aneel_request(self, offset: int) -> None:
         try:
-            answer = self.make_request(offset)
+            answer = self.request_aneel(offset)
             _, records = self.get_request_infos(answer)
             self.to_write.put((offset, records))
         except Exception as e:

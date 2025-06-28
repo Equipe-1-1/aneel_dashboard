@@ -25,7 +25,7 @@ function App() {
             <Route path="/modalities" element={<Modalities />} />
           </Routes>
 
-          <PlotComponent endpoint="/plot-data/"/>
+          <PlotComponent endpoint="/dummy_data/"/>
         </Router>
       </React.StrictMode>
 

@@ -1,8 +1,8 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-import plotly.graph_objects as go
 import numpy as np
 import polars as pl
+import plotly.graph_objects as go
 from plotly_resampler import FigureResampler, FigureWidgetResampler
 import plotly.express as px
 import json
@@ -20,18 +20,10 @@ app.add_middleware(
 
 df = px.data.gapminder()
 
-dh = DataHandler()
-lf = dh.LazyFrame()
+data_handler = DataHandler()
 
-
-@app.get("/plot-data/")
-async def get_plot_data():
-    x = np.arange(1_000_000)
-    noisy_sin = (3 + np.sin(x / 200) + np.random.randn(len(x)) / 10) * x / 1_000
-
-    fig = FigureResampler(go.Figure())
-    fig.add_trace(go.Scattergl(name='noisy sine', showlegend=True), hf_x=x, hf_y=noisy_sin)
-
+@app.get("/dummy_data/")
+async def get_dummy_data():
     fig = px.scatter(df.query("year==2007"),
         x="gdpPercap",
         y="lifeExp",
@@ -43,117 +35,20 @@ async def get_plot_data():
     return json.loads(fig)
 
 
-@app.get("/national-horizontal/")
-async def get_national_horizontal():
-    label_category = "NomRegiao"
-    
-    lfs = [
-        lf.group_by(label_category).agg(
-            pl.col("MdaPotenciaInstaladaKW")
-            .sum().round(2).alias("potency_sum")
-        )
-    ]
+@app.get("/national_production_horizontal_by_region/")
+async def get_national_production_horizontal_by_region():
+    plot_figure = data_handler.catch_national_production_horizontal_plot_by_region()
+    plot_figure = plot_figure.to_json()
+    return json.loads(plot_figure)
 
-    lfs.append(
-        lf.select(
-            pl.lit("Produção Nacional").alias(label_category),
-            pl.col("MdaPotenciaInstaladaKW")
-            .sum().round(2).alias("potency_sum")
-        )
-    )
+@app.get("/national_production_vertical_by_region/")
+async def get_national_production_vertical():
+    plot_figure = data_handler.catch_national_production_vertical_plot_by_region()
+    plot_figure = plot_figure.to_json()
+    return json.loads(plot_figure)
 
-    potency_lf = pl.concat(lfs)
-    potency_lf = potency_lf.sort("potency_sum")
-    potency_lf = potency_lf.with_columns(
-        pl.when(pl.col(label_category) == "Produção Nacional")
-        .then(pl.lit("RoyalBlue"))
-        .otherwise(pl.lit("DimGrey"))
-        .alias("color")
-    )
-
-    df = potency_lf.collect()
-
-    #return json.loads(df.write_json())
-
-    fig = go.Figure(
-        go.Bar(
-            x=df["potency_sum"],
-            y=df[label_category],
-            marker_color=df["color"],
-            orientation='h',
-            hovertemplate = '<b>Produção</b>: %{x:.2f}kW<extra></extra>',
-            hoverinfo="skip"
-        )
-    )
-
-    fig.update_layout(
-        title="Produção por região",
-        xaxis_title="Potência instalada (kW)"
-    )
-
-    fig = fig.to_json()
-    return json.loads(fig)
-
-
-
-@app.get("/national-bubble/")
-async def get_national_bubble():
-    location_cols = ["NomRegiao","NomMunicipio", "SigUF"]
-
-    potency_lf = (
-        lf.group_by(location_cols).agg(
-            pl.col("MdaPotenciaInstaladaKW")
-            .sum()
-            .round(2)
-            .alias("potency_sum"),
-
-            pl.col("MdaPotenciaInstaladaKW")
-            .is_not_null()
-            .sum()
-            .alias("number_of_productors"),
-
-            pl.col("SigModalidadeEmpreendimento")
-            .filter(pl.col("SigModalidadeEmpreendimento") == "P")
-            .is_not_null()
-            .sum()
-            .alias("micro_businesses_count"),
-        )
-    )
-
-    potency_lf = (
-        potency_lf.with_columns(
-            pl.concat_str(
-                [pl.col("NomMunicipio"), pl.col("SigUF")],
-                separator=", "
-            ).alias("city_state")
-        )
-    )
-
-    df = potency_lf.collect()
-
-    return json.loads(df.write_json())
-
-    fig = go.Figure(
-        go.Scatter(
-            x=df["potency_sum"],
-            y=df["micro_businesses_count"],
-            marker=dict(
-                size=df["number_of_productors"],
-                #color=df["NomRegiao"],
-            ),
-            #hover_name=df["city_state"],
-            #log_x = True,
-            #size_max=60,
-            hovertemplate = '<b>Produção</b>: %{x:.2f}kW<extra></extra>',
-            hoverinfo="skip"
-        )
-    )
-
-    fig.update_layout(
-        title="Produção por região",
-        xaxis_title="Potência instalada (kW)",
-        yaxis_title="Número de microgedores (P)"
-    )
-    
-    fig = fig.to_json()
-    #return json.loads(fig)
+@app.get("/national_production_bubbles/")
+async def get_national_production_bubbles():
+    plot_figure = catch_national_production_bubbles()
+    plot_figure = plot_figure.to_json()
+    return json.loads(plot_figure)
