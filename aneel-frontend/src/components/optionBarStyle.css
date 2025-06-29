@@ -1,0 +1,14 @@
+/* optionBarStyle.css */
+.custom-navbar {
+  display: flex;
+  justify-content: space-between;
+}
+
+.custom-navbar .navbar-collapse {
+  flex-grow: 0;
+  margin: 0 auto;
+}
+
+.custom-navbar .navbar-brand {
+  flex-shrink: 0;
+}
