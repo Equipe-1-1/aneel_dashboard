@@ -8,6 +8,8 @@ dependencies = [
     "dash==2.18.0",
     "fastapi[standard]==0.115.12",
     "fastexcel>=0.14.0",
+    "geobr==0.2.2",
+    "geopandas==1.0.1",
     "ipywidgets>=7.0.0",
     "jupyterlab==4.4.0",
     "pandas==2.2.3",

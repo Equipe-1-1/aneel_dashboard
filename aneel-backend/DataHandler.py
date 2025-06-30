@@ -4,6 +4,7 @@ import plotly.graph_objects as go
 
 from DataLoader import DataLoader
 from os.path import exists
+import geobr
 
 import polars as pl
 
@@ -18,6 +19,8 @@ class DataHandler:
 
         self.DataLoader = DataLoader(self.DATA_FILE_PATH)
         self.lazyframe = self.update_data()
+        self.primary_color = "RoyalBlue"
+        self.faded_color = "DimGrey"
 
 
     def update_data(self) -> pl.LazyFrame:
@@ -34,47 +37,98 @@ class DataHandler:
         return lf.with_columns(
             pl.col("MdaPotenciaInstaladaKW").str.replace(",", ".")
             .cast(pl.Float64)
-            )
+        )
 
     
     def catch_national_production_horizontal_plot_by_region(self) -> go.Figure:
-        df = catch_national_production_horizontal_data(self.lazyframe, scope="NomRegiao")
+        df = catch_national_production_horizontal_df(self.lazyframe, scope="NomRegiao")
+        if df.shape[0] == 0:
+            return go.Figure()
+
+        df = df.sort("production")
+        df = df.with_columns(
+            pl.when(pl.col("location") == "Brasil")
+            .then(pl.lit(self.primary_color))
+            .otherwise(pl.lit(self.faded_color))
+            .alias("color")
+        )
 
         fig = go.Figure(
             go.Bar(
-                x = df["potency_sum"],
-                y = df["NomRegiao"],
+                x = df["production"],
+                y = df["location"],
                 marker_color = df["color"],
                 orientation = 'h',
-                hovertemplate = '<b>Produção</b>: %{x:.2f}kW<extra></extra>',
+                customdata = df[["unit"]],  
+                hovertemplate = '<b>Produção</b>: %{x:.2f} %{customdata[0]}<extra></extra>',
                 hoverinfo = "skip"
-                )
             )
-
+        )
         fig.update_layout(
-            title = "Produção por região",
-            xaxis_title = "Potência instalada (kW)"
-            )
+            #title = "Produção, por região:",
+            xaxis_title = f"Potência instalada ({df['unit'].unique()[0]})",
+            yaxis_title = "Localização",
+        )
 
         return fig
 
     def catch_national_production_vertical_plot_by_region(self) -> go.Figure:
-        df = catch_national_production_vertical_data(self.lazyframe, scope="NomRegiao")
+        df = catch_national_production_vertical_df(self.lazyframe, scope="NomRegiao")
+        if df.shape[0] == 0:
+            return go.Figure()
+
+        df = df.sort("production", descending=True)
 
         fig = go.Figure(
             go.Bar(
-                x = df["NomRegiao"],
-                y = df["potency_sum"],
-                #marker_color = df["color"],
-                hovertemplate = '<b>Produção</b>: %{x:.2f}kW<extra></extra>',
+                x = df["location"],
+                y = df["production"],
+                hovertemplate = '<b>Produção</b>: %{y:.2f}GW<extra></extra>',
                 hoverinfo = "skip"
-                )
             )
-
+        )
         fig.update_layout(
-            title = "Produção por região",
-            xaxis_title = "Potência instalada (kW)"
+            #title = "Produção por região",
+            xaxis_title = "Localização",
+            yaxis_title = f"Potência instalada ({df['unit'].unique()[0]})",
+        )
+
+        return fig
+
+
+    def catch_national_production_map(self) -> go.Figure:
+        map = geobr.read_state(code_state="all", year=2020)
+
+        df = catch_national_production_df(self.lazyframe, scope="SigUF")
+        df = df.to_pandas()
+
+        df_map = map.merge(
+            df,
+            left_on='abbrev_state',
+            right_on='location',
+        )
+
+        fig = go.Figure(
+            go.Choropleth(
+                geojson=df_map.geometry.__geo_interface__,
+                locations=df_map.index,
+                z=df_map["production"],
+                text=df_map["location"],
+                customdata=df_map[["production", "unit"]],
+                colorscale="Dense",
+                colorbar_title=f"Produção ({df_map['unit'][0]})",
+                hovertemplate=(
+                    "<b>%{text}</b><br>" +
+                    "Produção: %{customdata[0]:.2f} %{customdata[1]}<extra></extra>"
+                ),
             )
+        )
+        fig.update_geos(fitbounds="locations", visible=False)
+        fig.update_layout(
+            title_text="Produção por estado",
+            title_x=0.5,
+            margin={"r":0,"t":40,"l":0,"b":0}
+        )
 
         return fig
 
@@ -94,14 +148,14 @@ class DataHandler:
                 #size_max=60,
                 hovertemplate = '<b>Produção</b>: %{x:.2f}kW<extra></extra>',
                 hoverinfo ="skip"
-                )
             )
+        )
 
         fig.update_layout(
             title = "Produção por região",
             xaxis_title = "Potência instalada (kW)",
             yaxis_title = "Número de microgedores (P)"
-            )
+        )
         
         return fig
 
@@ -125,8 +179,8 @@ class DataHandler:
                 .is_not_null()
                 .sum()
                 .alias("micro_businesses_count"),
-                )
             )
+        )
 
         potency_lf = (
             potency_lf.with_columns(

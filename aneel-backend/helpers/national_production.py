@@ -3,44 +3,49 @@ import plotly.express as px
 import plotly.graph_objects as go
 
 import polars as pl
+import pandas as pd
 
-def catch_national_production_horizontal_data(lazyframe, scope: str) -> pl.DataFrame:
-    lfs = catch_national_production_lazyframes(lazyframe, scope)
-    lfs.append(
-        lazyframe.select(
-            pl.lit("Produção Nacional").alias(scope),
-            pl.col("MdaPotenciaInstaladaKW")
-            .sum().round(2).alias("potency_sum")
-            )
+def catch_national_production_horizontal_df(lazyframe, scope: str) -> pl.DataFrame:
+    df = catch_national_production_df(lazyframe, scope)
+    if df.shape[0] == 0:
+        return df
+
+    return pl.concat(
+        [
+            df,
+            pl.DataFrame({
+                "location": ["Brasil"],
+                "unit": [df["unit"].unique()[0]],
+                "production": [df["production"].sum()],
+            })
+        ],
+        how = "vertical_relaxed"
+    )
+
+
+def catch_national_production_vertical_df(lazyframe: pl.LazyFrame, scope: str) -> pl.DataFrame:
+    df = catch_national_production_df(lazyframe, scope)
+    return df
+
+def catch_national_production_df(lazyframe: pl.LazyFrame, scope: str) -> pl.DataFrame:
+    lf = lazyframe.group_by(scope).agg(
+        pl.lit("kW").alias("unit"),
+        pl.col("MdaPotenciaInstaladaKW")
+        .sum().round(2).alias("production")
+    )
+    lf = lf.rename({ scope: "location" })
+    df = lf.collect()
+    min_potency = df["production"].min()
+    
+    if min_potency // 10**6 > 0:
+        df = df.with_columns(
+            pl.col("production") / 10**6,
+            pl.lit("GW").alias("unit")
+        )
+    elif min_potency // 10**3 > 0:
+        df = df.with_columns(
+            pl.col("production") / 10**3,
+            pl.lit("MW").alias("unit")
         )
 
-    potency_lf = pl.concat(lfs)
-    potency_lf = potency_lf.sort("potency_sum")
-    potency_lf = potency_lf.with_columns(
-        pl.when(pl.col(scope) == "Produção Nacional")
-        .then(pl.lit("RoyalBlue"))
-        .otherwise(pl.lit("DimGrey"))
-        .alias("color")
-        )
-    return potency_lf.collect()
-
-
-def catch_national_production_vertical_data(lazyframe: pl.LazyFrame, scope: str) -> pl.DataFrame:
-    lfs = catch_national_production_lazyframes(lazyframe, scope)
-
-    potency_lf = pl.concat(lfs)
-    potency_lf = potency_lf.sort("potency_sum")
-    return potency_lf.with_columns(
-        pl.when(pl.col(scope) == "Produção Naciona")
-        .then(pl.lit("RoyalBlue"))
-        .otherwise(pl.lit("DimGrey"))
-        .alias("color")
-        ).collect()
-
-def catch_national_production_lazyframes(lazyframe: pl.LazyFrame, scope: str) -> pl.LazyFrame:
-    return [
-        lazyframe.group_by(scope).agg(
-            pl.col("MdaPotenciaInstaladaKW")
-            .sum().round(2).alias("potency_sum")
-            )
-        ]
+    return df

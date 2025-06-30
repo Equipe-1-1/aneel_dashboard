@@ -3,6 +3,7 @@ import PlotComponent from '../components/PlotComponent';
 import './national.css';
 
 function National() {
+  /*
   return (
     <div className="national-container">
       <h2>Panorama Nacional</h2>
@@ -23,6 +24,12 @@ function National() {
       </div>
     </div>
   );
+  */
+  return <div className="by_region" >
+    <PlotComponent endpoint="/national_production_horizontal_by_region/" />
+    <PlotComponent endpoint="/national_production_vertical_by_region/" />
+    <PlotComponent endpoint="/national_production_map/" />
+  </div>
 }
 
 export default National;
