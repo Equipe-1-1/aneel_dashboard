@@ -38,14 +38,27 @@ function PlotCard({ endpoint, className, style }) {
     fetchPlotData();
   }, []);
 
+  const handleMouseEnter = () => {
+    document.body.classList.add("no-scroll");
+  };
+
+  const handleMouseLeave = () => {
+    document.body.classList.remove("no-scroll");
+  };
+
   const FrameWork = ({ children }) => (
-    <StyledCard className={className} style={style}>
+    <StyledCard
+      className={className}
+      style={style}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
       <StyledCardBody>
         <Card.Title>Plot</Card.Title>
-        { children }
+        {children}
       </StyledCardBody>
     </StyledCard>
-  )
+  );
 
   if (loading) {
     return (

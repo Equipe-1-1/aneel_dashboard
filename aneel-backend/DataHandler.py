@@ -100,7 +100,7 @@ class DataHandler:
 
 
     def catch_national_production_map(self) -> go.Figure:
-        map = geobr.read_state(code_state="all", year=2020)
+        map = geobr.read_state(year=2020)
 
         df = catch_national_production_df(self.lazyframe, scope="SigUF")
         df = df.to_pandas()

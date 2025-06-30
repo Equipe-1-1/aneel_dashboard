@@ -1,5 +1,4 @@
 import React, { useState } from 'react'
-import './App.css'
 import "bootstrap/dist/css/bootstrap.min.css";
 import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
 import PlotComponent from './components/PlotCard'
