@@ -1,6 +1,6 @@
 // src/pages/Home.jsx
 import React from 'react';
-import PlotComponent from '../components/PlotComponent';
+import PlotComponent from '../components/PlotCard';
 import './home.css';
 
 function Home() {

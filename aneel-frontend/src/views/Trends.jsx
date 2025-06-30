@@ -1,5 +1,5 @@
 import React from 'react';
-import PlotComponent from '../components/PlotComponent';
+import PlotComponent from '../components/PlotCard';
 import './trends.css';
 
 function Trends() {

@@ -1,35 +1,34 @@
-import React from 'react';
-import PlotComponent from '../components/PlotComponent';
-import './national.css';
+import PlotCard from '../components/PlotCard';
+import styled from 'styled-components';
 
 function National() {
-  /*
   return (
-    <div className="national-container">
-      <h2>Panorama Nacional</h2>
-      
-      <div className="chart-section">
-        <h3>Distribuição por Região</h3>
-        <PlotComponent 
-          endpoint="/api/plots/regional_distribution" 
-          style={{ height: '600px' }}
-        />
-      </div>
-      
-      <div className="chart-section">
-        <h3>Top 10 Estados</h3>
-        <PlotComponent 
-          endpoint="/api/plots/top_states" 
-        />
-      </div>
-    </div>
-  );
-  */
-  return <div className="by_region" >
-    <PlotComponent endpoint="/national_production_horizontal_by_region/" />
-    <PlotComponent endpoint="/national_production_vertical_by_region/" />
-    <PlotComponent endpoint="/national_production_map/" />
-  </div>
+  <Main className="national-container" >
+    <FlexContainer>
+      <PlotCard style={{ flex: "2 1 0" }} endpoint="/national_production_horizontal_by_region/" />
+      <PlotCard style={{ flex: "1 1 0" }} endpoint="/national_production_vertical_by_region/" />
+    </FlexContainer>
+    <PlotCard endpoint="/national_production_map/" />
+  </Main>
+  )
 }
 
 export default National;
+
+const Main = styled.main`
+  padding: 20px;
+  margin: 0 auto;
+  width: 100%;
+  min-width: 500px;
+`
+
+const FlexContainer = styled.div`
+  display: flex;
+  flex-direction: row;
+  @media (max-width: 1000px) {
+    flex-direction: column;
+  }
+  gap: 20px;
+  margin-bottom: 20px;
+  width: 100%;
+`

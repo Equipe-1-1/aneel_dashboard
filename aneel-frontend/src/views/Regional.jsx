@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import PlotComponent from '../components/PlotComponent';
+import PlotComponent from '../components/PlotCard';
 import './regional.css';
 
 const regions = [

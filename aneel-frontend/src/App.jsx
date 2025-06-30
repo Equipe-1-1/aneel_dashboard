@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import './App.css'
 import "bootstrap/dist/css/bootstrap.min.css";
 import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
-import PlotComponent from './components/PlotComponent'
+import PlotComponent from './components/PlotCard'
 import OptionBar from './components/OptionBar'
 import National from './views/National';
 import Regional from './views/Regional';
@@ -25,7 +25,6 @@ function App() {
             <Route path="/modalities" element={<Modalities />} />
           </Routes>
 
-          <PlotComponent endpoint="/dummy_data/"/>
         </Router>
       </React.StrictMode>
 

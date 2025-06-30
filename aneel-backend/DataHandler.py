@@ -19,7 +19,7 @@ class DataHandler:
 
         self.DataLoader = DataLoader(self.DATA_FILE_PATH)
         self.lazyframe = self.update_data()
-        self.primary_color = "RoyalBlue"
+        self.primary_color = "#0d6efd"
         self.faded_color = "DimGrey"
 
 
@@ -68,6 +68,7 @@ class DataHandler:
             #title = "Produção, por região:",
             xaxis_title = f"Potência instalada ({df['unit'].unique()[0]})",
             yaxis_title = "Localização",
+            margin={"r":0,"t":40,"l":0,"b":10},
         )
 
         return fig
@@ -83,6 +84,7 @@ class DataHandler:
             go.Bar(
                 x = df["location"],
                 y = df["production"],
+                marker_color = self.primary_color,
                 hovertemplate = '<b>Produção</b>: %{y:.2f}GW<extra></extra>',
                 hoverinfo = "skip"
             )
@@ -91,6 +93,7 @@ class DataHandler:
             #title = "Produção por região",
             xaxis_title = "Localização",
             yaxis_title = f"Potência instalada ({df['unit'].unique()[0]})",
+            margin={"r":0,"t":40,"l":0,"b":10},
         )
 
         return fig
@@ -125,7 +128,7 @@ class DataHandler:
         )
         fig.update_geos(fitbounds="locations", visible=False)
         fig.update_layout(
-            title_text="Produção por estado",
+            #title_text="Produção por estado",
             title_x=0.5,
             margin={"r":0,"t":40,"l":0,"b":0}
         )
@@ -134,6 +137,7 @@ class DataHandler:
 
 
 
+    ''' Future Feature
     def catch_national_production_bubbles(self) -> go.Figure:
         fig = go.Figure(
             go.Scatter(
@@ -192,4 +196,5 @@ class DataHandler:
         )
 
         return potency_lf.collect()
+    '''
 
